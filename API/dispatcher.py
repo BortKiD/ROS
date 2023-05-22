@@ -1,19 +1,18 @@
-import tkinter as tk
 import time
 import datetime
-from .acclerometerClass import *
-from .gyroscopeClass import *
-from .magnitometrClass import *
-from .DatasetClass import *
-# from lidarClass import *
-from .PointClass import *
-from .dataHandler import *
-# from smbus import SMBus
 from threading import Thread
-# from DataStorage import *
+# from smbus import SMBus
+from API.acclerometerClass import *
+from API.gyroscopeClass import *
+from API.magnitometrClass import *
+from API.DatasetClass import *
+# from API.lidarClass import *
+from API.PointClass import *
+from API.dataHandler import *
+from API.DataStorage import *
 
 class Dispatcher():
-    #SensorMass = []
+    """Класс диспетчера, производящий создание и вызов считывания у объектов классов датчиков."""
     def __init__(self):
         self.Dataset = Dataset()
         self.AcclFreq = 1
@@ -23,38 +22,42 @@ class Dispatcher():
         self.GyroMass = []
         self.MagnMass = []
         self.LidarMass = []
-        self.SensorMass = []
-        self.SensorMass.append(("Accelerometer_pin", '53'))
-        self.SensorMass.append(("Magnitometer_pin", '1e'))
-        self.SensorMass.append(("Gyroscope_pin", '68'))
-        self.SensorMass.append(("Lidar_usb", '15d1:0000'))
+        self.SensorMass = [
+            ("Accelerometer_pin", '53'),
+            ("Magnitometer_pin", '1e'),
+            ("Gyroscope_pin", '68'),
+            ("Lidar_usb", '15d1:0000')]
         self.current_datetime = datetime.datetime(1,1,1)
-        self.date, self.ctime = self.current_datetime.now().isoformat().split("T")
         
     def AddAccelerometer(self, register:int, rate:float):
+        """Добавляет датчик акселлерометра в диспетчер."""
         accelerometer = Accelerometer(register)
         accelerometer.SetMeasurementRate(rate)
         self.AcclFreq = rate
         self.AcclMass.append(accelerometer)
 
     def AddGyro(self, register:int, rate:float):
+        """Добавляет датчик гироскопа в диспетчер."""
         Gyro = Gyroscope(register)
         Gyro.SetMeasurementRate(rate)
         self.GyroFreq = rate
         self.GyroMass.append(Gyro)
 
     def AddMagnitometer(self, register:int, rate:float):
+        """Добавляет датчик магнитометра в диспетчер."""
         magnitometer = Magnitometr(register)
         magnitometer.SetMeasurementRate(rate)
         self.MagnFreq = rate
         self.MagnMass.append(magnitometer)
 
     # def AddLidar(self, port:str, speed:int, rate:float):
+    #     """Добавляет датчик лидара в диспетчер"""
     #     lidar = Lidar(port, speed)
     #     lidar.SetMeasurementRate(rate)
     #     self.LidarMass.append(lidar)
 
     def getDataset(self):
+        """Возвращает набор данных."""
         return self.Dataset
 
     def StartThreads(self):
@@ -70,15 +73,15 @@ class Dispatcher():
                 self.Dataset.xAccl, self.Dataset.yAccl, self.Dataset.zAccl = xAccl, yAccl, zAccl
                 roll = DataHandler.GetRoll(yAccl, zAccl)
                 pitch = DataHandler.GetPitch(xAccl, yAccl, zAccl)
-                # Saving data
-                # Data format: [current_date, current_time, xAccl, yAccl, zAccl]
-                date, ctime = self.date, self.ctime
+                # Save data format: [current_date, current_time, xAccl, yAccl, zAccl]
+                date, ctime = self.current_datetime.now().isoformat().split("T")
                 data_storage.save_data((date, ctime, xAccl, yAccl, zAccl))
-                data_storage.save_to_file("accelerometer.json")
+                data_storage.save_to_file("accelerometer.csv")
                 self.Dataset.Roll = roll
                 self.Dataset.Pitch = pitch
 
         def Gyro(gyro):
+            data_storage = DataStorage()
             while True:
                 if not gyro.measurement_rate == self.GyroFreq:
                     print("Gyroscope: frequency changed")
@@ -86,9 +89,14 @@ class Dispatcher():
                 
                 time.sleep(1/gyro.measurement_rate)
                 xGyro, yGyro, zGyro = gyro.GetMeasurementData()
+                # Save data format: [current_date, current_time, xGyro, yGyro, zGyro]
+                date, ctime = self.current_datetime.now().isoformat().split("T")
+                data_storage.save_data((date, ctime, xGyro, yGyro, zGyro))
+                data_storage.save_to_file("gyroscope.csv")
                 self.Dataset.xGyro, self.Dataset.yGyro, self.Dataset.zGyro = xGyro, yGyro, zGyro
                 
         def Magn(magn):
+            data_storage = DataStorage()
             while True:
                 if not magn.measurement_rate == self.MagnFreq:
                     print("Magnitometer: frequency changed")
@@ -96,12 +104,17 @@ class Dispatcher():
                 
                 time.sleep(1/magn.measurement_rate)
                 xMagn, yMagn, zMagn = magn.GetMeasurementData()
+                # Save data format: [current_date, current_time, xMagn, yMagn, zMagn]
+                date, ctime = self.current_datetime.now().isoformat().split("T")
+                data_storage.save_data((date, ctime, xMagn, yMagn, zMagn))
+                data_storage.save_to_file("magnitometer.csv")
                 self.Dataset.xMagn, self.Dataset.yMagn, self.Dataset.zMagn = xMagn, yMagn, zMagn
                 yaw = DataHandler.GetYaw(xMagn, yMagn)
                 yaw = DataHandler.TestYaw2(xMagn, yMagn, zMagn, self.Dataset.Roll, self.Dataset.Pitch)
                 self.Dataset.Yaw = yaw
 
         # def Lidar(lidar):
+        #     data_storage = DataStorage()
         #     while True:
         #         time.sleep(1/lidar.measurement_rate)
         #         lidar_arr = lidar.GetMeasurementData()
@@ -117,15 +130,15 @@ class Dispatcher():
         
         self.Threads = []
         for i in self.AcclMass:
-            thread = Thread(target = Accl, args=(i,)) 
+            thread = Thread(target = Accl, args=(i,), daemon=True) 
             self.Threads.append(thread)
         self.AcclMass = []
         for i in self.GyroMass:
-            thread = Thread(target = Gyro, args=(i,))
+            thread = Thread(target = Gyro, args=(i,), daemon=True)
             self.Threads.append(thread)
         self.GyroMass = []
         for i in self.MagnMass:
-            thread = Thread(target = Magn, args=(i,))
+            thread = Thread(target = Magn, args=(i,), daemon=True)
             self.Threads.append(thread)
         self.MagnMass = []
         # for i in self.LidarMass:

@@ -1,4 +1,3 @@
-# from PointClass import Point
 # Класс для хранения данных с датчиков
 class Dataset():
     def __init__(self):

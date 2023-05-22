@@ -1,5 +1,4 @@
 import random
-from DataStorage import *
 
 # Класс гироскопа
 class Accelerometer():
