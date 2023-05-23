@@ -1,9 +1,13 @@
+import serial
+import math
+from hokuyo.driver import hokuyo
+from hokuyo.tools import serial_port
+
 '''
 Description: class, based on librarry hokuyo-python-lib
 Author: paoole
 Github: https://github.com/pasuder/hokuyo-python-lib
 '''
-import random
 
 #Класс лидара.
 class Lidar():
@@ -11,10 +15,12 @@ class Lidar():
     #Конструктор, принимающий порт устройства, скорость считывания.
     def __init__(self, uart_port:str, uart_speed:int):
         try:
-            port = uart_port
-            speed = uart_speed
+            laser_serial = serial.Serial(port=uart_port, baudrate=uart_speed, timeout=0.5)
+            port = serial_port.SerialPort(laser_serial)
         except ValueError:
             print("Неверный порт!")
+        self.laser = hokuyo.Hokuyo(port)        
+        self.laser.laser_on()
 
     #Метод, устанавливающий частоту считывания датчика в поле класса.
     def SetMeasurementRate(self, miliseconds:float) -> bool:
@@ -30,15 +36,14 @@ class Lidar():
     def GetMeasurementData(self):
         list=[]
         try:
-            mass = []
-            for i in range(-180, 181):
-                mass.append([i, round(random.uniform(0,100))])
-
+            mass = self.laser.get_single_scan()
         except SystemError:
             print("Невозможно считать данные с лидара!")
-        for key in mass:
+        for key in mass.items():
             if key[0] > 60 or key[0] < -60:
                 continue
+            #if key[1] > 1500:
+            #    continue
             #Отсев "нулевых" точек
             if key[1] <= 10:
                 continue

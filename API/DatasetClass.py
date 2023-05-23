@@ -1,8 +1,9 @@
 # Класс для хранения данных с датчиков
 class Dataset():
     def __init__(self):
+        # Lidar
         self.Points = []
-        # Angle
+        # Углы наклона в градусах
         self.Roll = 0
         self.Pitch = 0
         self.Yaw = 0

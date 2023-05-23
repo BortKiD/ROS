@@ -47,6 +47,9 @@ def set_frequency(e):
     frequency = magnitometer_scale.get()
     dispatcher.MagnFreq = frequency
 
+    frequency = lidar_scale.get()
+    dispatcher.LidarFreq = frequency + 10
+
 root = Tk()
 root.title("Интерфейс модуля обработки данных с датчиков лесного робота с помощью ROS2")
 root.iconbitmap('./RobotImage.ico')
@@ -126,6 +129,7 @@ dispatcher = Dispatcher()
 dispatcher.AddAccelerometer(0x53, 1)
 dispatcher.AddGyro(0x68, 1)
 dispatcher.AddMagnitometer(0x1e, 1)
+dispatcher.AddLidar('/dev/ttyACM0', 19200, 10)
 dispatcher.StartThreads()
 
 root.after(100, update)

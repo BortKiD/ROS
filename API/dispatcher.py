@@ -6,7 +6,7 @@ from API.acclerometerClass import *
 from API.gyroscopeClass import *
 from API.magnitometrClass import *
 from API.DatasetClass import *
-# from API.lidarClass import *
+from API.lidarClass import *
 from API.PointClass import *
 from API.dataHandler import *
 from API.DataStorage import *
@@ -18,6 +18,7 @@ class Dispatcher():
         self.AcclFreq = 1
         self.MagnFreq = 1
         self.GyroFreq = 1
+        self.LidarFreq = 1
         self.AcclMass = []
         self.GyroMass = []
         self.MagnMass = []
@@ -50,11 +51,11 @@ class Dispatcher():
         self.MagnFreq = rate
         self.MagnMass.append(magnitometer)
 
-    # def AddLidar(self, port:str, speed:int, rate:float):
-    #     """Добавляет датчик лидара в диспетчер"""
-    #     lidar = Lidar(port, speed)
-    #     lidar.SetMeasurementRate(rate)
-    #     self.LidarMass.append(lidar)
+    def AddLidar(self, port:str, speed:int, rate:float):
+        """Добавляет датчик лидара в диспетчер"""
+        lidar = Lidar(port, speed)
+        lidar.SetMeasurementRate(rate)
+        self.LidarMass.append(lidar)
 
     def getDataset(self):
         """Возвращает набор данных."""
@@ -113,20 +114,26 @@ class Dispatcher():
                 yaw = DataHandler.TestYaw2(xMagn, yMagn, zMagn, self.Dataset.Roll, self.Dataset.Pitch)
                 self.Dataset.Yaw = yaw
 
-        # def Lidar(lidar):
-        #     data_storage = DataStorage()
-        #     while True:
-        #         time.sleep(1/lidar.measurement_rate)
-        #         lidar_arr = lidar.GetMeasurementData()
-        #         points_arr = []
-        #         for i in lidar_arr:
-        #             angle = i[0]
-        #             distance = i[1]
-        #             x, y = DataHandler.GetCoordinates(distance, angle)
-        #             point = Point(x, y, distance, angle)
-        #             #print(angle, distance, x, y)
-        #             points_arr.append(point)
-        #         self.Dataset.Points = points_arr
+        def Lidar(lidar):
+            data_storage = DataStorage()
+            while True:
+                if not lidar.measurement_rate == self.LidarFreq:
+                    print("Lidar: frequency changed")
+                    lidar.SetMeasurementRate(self.LidarFreq)
+                time.sleep(1/lidar.measurement_rate)
+                lidar_arr = lidar.GetMeasurementData()
+                points_arr = []
+                for i in lidar_arr:
+                    angle = i[0]
+                    distance = i[1]
+                    x, y = DataHandler.GetCoordinates(distance, angle)
+                    point = Point(x, y, distance, angle)
+                    points_arr.append(str(point))
+                # Save data format: [current_date, current_time, points]
+                date, ctime = self.current_datetime.now().isoformat().split("T")
+                data_storage.save_data((date, ctime, points_arr))
+                data_storage.save_to_file("lidar.csv")
+                self.Dataset.Points = points_arr
         
         self.Threads = []
         for i in self.AcclMass:
@@ -141,10 +148,10 @@ class Dispatcher():
             thread = Thread(target = Magn, args=(i,), daemon=True)
             self.Threads.append(thread)
         self.MagnMass = []
-        # for i in self.LidarMass:
-        #     thread = Thread(target = Lidar, args=(i,))
-        #     self.Threads.append(thread)
-        # self.LidarMass = []
+        for i in self.LidarMass:
+            thread = Thread(target = Lidar, args=(i,), daemon=True)
+            self.Threads.append(thread)
+        self.LidarMass = []
 
         for i in self.Threads:
             i.start()
