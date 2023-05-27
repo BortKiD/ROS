@@ -24,9 +24,12 @@ class Magnitometr():
     # На каждую ось приходится младший и старший байт, которые затем складываются
     # Возвращает массив значений по каждой оси в трехмерной системе координат
     def GetMeasurementData(self):
-        xMagn = random.uniform(-32768, 32768)
-        yMagn = random.uniform(-32768, 32768)
-        zMagn = random.uniform(-32768, 32768)
+        # xMagn = random.uniform(-32768, 32768)
+        # yMagn = random.uniform(-32768, 32768)
+        # zMagn = random.uniform(-32768, 32768)
+        xMagn = 30
+        yMagn = 30
+        zMagn = 30
 
         return [xMagn, yMagn, zMagn]
 

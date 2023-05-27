@@ -24,9 +24,12 @@ class Gyroscope():
     # На каждую ось приходится младший и старший байт, которые затем складываются
     # Возвращает массив значений по каждой оси в трехмерной системе координат
     def GetMeasurementData(self):
-        xGyro = random.uniform(-32768, 32768)
-        yGyro = random.uniform(-32768, 32768)
-        zGyro = random.uniform(-32768, 32768)
+        # xGyro = random.uniform(-32768, 32768)
+        # yGyro = random.uniform(-32768, 32768)
+        # zGyro = random.uniform(-32768, 32768)
+        xGyro = 20
+        yGyro = 20
+        zGyro = 20
 
         return [xGyro, yGyro, zGyro]
 

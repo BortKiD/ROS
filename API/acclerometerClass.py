@@ -22,9 +22,12 @@ class Accelerometer():
     # На каждую ось приходится младший и старший байт, которые затем складываются
     # Возвращает массив значений по каждой оси в трехмерной системе координат
     def GetMeasurementData(self):
-        xAccl = random.uniform(-32768, 32768)
-        yAccl = random.uniform(-32768, 32768)
-        zAccl = random.uniform(-32768, 32768)
+        # xAccl = random.uniform(-32768, 32768)
+        # yAccl = random.uniform(-32768, 32768)
+        # zAccl = random.uniform(-32768, 32768)
+        xAccl = 10
+        yAccl = 10
+        zAccl = 10
 
         return [xAccl, yAccl, zAccl]
 
