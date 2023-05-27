@@ -8,14 +8,4 @@ class Point():
         self.Y = y
         self.Length = length
         self.Angle = angle
-
-    def __str__(self) -> str:
-        lst = [self.X, self.Y, self.Length, self.Angle]
-        return str(lst)
-
-    def __iter__(self) -> Iterable[int]:
-        yield self.X
-        yield self.Y
-        yield self.Length
-        yield self.Angle
     

@@ -1,12 +1,22 @@
 from tkinter import *
 from API.dispatcher import *
 
-# Optional data save
-# Event messages
 # Lidar display
+def drawLidarData(canvas, points):
+    """Отображает точки лидара на интерфейсе."""
+    if len(points) > 0:
+        norm_xy = [(i.X, i.Y) for i in points]
+        canvas.delete('all')
+        canvas.create_line(5, 50, 10, 50, arrow=LAST, fill='red')
+        # canvas.create_line(5, 50, 100, 50, fill='red')
+        for p in norm_xy:
+            x1, y1 = p[0] + 1, p[1] + 50 + 1
+            x2, y2 = p[0] - 1, p[1] + 50 - 1
+            canvas.create_oval(x1, y1, x2, y2, fill='black')
+        canvas.update()
+
 def update():
     """Получает данные с датчиков и отображает их на интерфейсе."""
-    
     dataset = dispatcher.GetDataset()
 
     xAccl, yAccl, zAccl = dataset.xAccl, dataset.yAccl, dataset.zAccl
@@ -29,7 +39,12 @@ def update():
     label_roll['text'] = 'Крен = ' + "{:.2f}".format(roll)
     label_yaw['text'] = 'Рысканье = ' + "{:.2f}".format(yaw)
 
-    if pitch > 30 or pitch < -30:
+    drawLidarData(lidar_canvas, dataset.Points)
+
+    if (pitch > 30 or pitch < -30) and (roll > 30 or roll < -30):
+        danger_label['bg'] = "#fbc"
+        danger_label['text'] = "Опасная ситуация: угол тангажа и крена > 30"
+    elif pitch > 30 or pitch < -30:
         danger_label['bg'] = "#fbc"
         danger_label['text'] = "Опасная ситуация: угол тангажа > 30"
     elif roll > 30 or roll < -30:
@@ -68,7 +83,7 @@ def select():
 root = Tk()
 root.title("Интерфейс модуля обработки данных с датчиков лесного робота с помощью ROS2")
 root.iconbitmap('./RobotImage.ico')
-root.geometry("600x200")
+root.geometry("600x250")
 
 # Создание элементов интерфейса
 accelerometer_label = Label(root, text='Accelerometer')
@@ -107,6 +122,7 @@ label_roll = Label(root, text='Roll = ?')
 label_yaw = Label(root, text='Yaw = ?')
 
 lidar_label = Label(root, text='Lidar')
+lidar_canvas = Canvas(root, background='white', width=100, height=100)
 lidar_scale = Scale(root, from_=0, to=5, orient=HORIZONTAL)
 lidar_scale.set(3)
 lidar_save_data = IntVar()
@@ -143,6 +159,7 @@ label_roll.grid(column=3, row=2)
 label_yaw.grid(column=3, row=3)
 
 lidar_label.grid(column=4, row=0)
+lidar_canvas.grid(column=4, row=1, columnspan=10, rowspan=3)
 lidar_scale.grid(column=4, row=4)
 lidar_check_button.grid(column=4, row=5)
 

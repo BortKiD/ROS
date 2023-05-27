@@ -152,7 +152,7 @@ class Dispatcher():
                         distance = i[1]
                         x, y = DataHandler.GetCoordinates(distance, angle)
                         point = Point(x, y, distance, angle)
-                        points_arr.append(str(point))
+                        points_arr.append(point)
                     # Save data format: [current_date, current_time, points]
                     if self.writeFile['lidar']:    
                         date, ctime = self.current_datetime.now().isoformat().split("T")
