@@ -14,11 +14,11 @@ class Dispatcher():
     """Класс диспетчера, производящий создание и вызов считывания у объектов классов датчиков."""
     def __init__(self):
         self.Dataset = Dataset()
-        self.AcclFreq = 1
-        self.MagnFreq = 1
-        self.GyroFreq = 1
-        self.LidarFreq = 1
-        self.writeFile = {
+        self.AccelerometerFrequency = 1
+        self.MagnitometerFrequency = 1
+        self.GyroscopeFrequency = 1
+        self.LidarFrequency = 1
+        self.WriteFile = {
             "lidar":0,
             "accl":0,
             "magn":0,
@@ -39,21 +39,21 @@ class Dispatcher():
         """Добавляет датчик акселлерометра в диспетчер."""
         accelerometer = Accelerometer(register)
         accelerometer.SetMeasurementRate(rate)
-        self.AcclFreq = rate
+        self.AccelerometerFrequency = rate
         self.AcclMass.append(accelerometer)
 
     def AddGyro(self, register:int, rate:float):
         """Добавляет датчик гироскопа в диспетчер."""
         Gyro = Gyroscope(register)
         Gyro.SetMeasurementRate(rate)
-        self.GyroFreq = rate
+        self.GyroscopeFrequency = rate
         self.GyroMass.append(Gyro)
 
     def AddMagnitometer(self, register:int, rate:float):
         """Добавляет датчик магнитометра в диспетчер."""
         magnitometer = Magnitometr(register)
         magnitometer.SetMeasurementRate(rate)
-        self.MagnFreq = rate
+        self.MagnitometerFrequency = rate
         self.MagnMass.append(magnitometer)
 
     def AddLidar(self, port:str, speed:int, rate:float):
@@ -68,24 +68,24 @@ class Dispatcher():
     
     def SetWritingFile(self, sensor, value):
         """Выставляет значение переменной включения/выключения записи файла."""
-        self.writeFile[sensor] = value
+        self.WriteFile[sensor] = value
 
     def StartThreads(self):
         def Accl(accl):
             data_storage = DataStorage()
             while True:
-                if isSensorFrequencyChanged(accl, self.AcclFreq):
+                if isSensorFrequencyChanged(accl, self.AccelerometerFrequency):
                     print("Accelerometer: frequency changed")
-                    accl.SetMeasurementRate(self.AcclFreq)
+                    accl.SetMeasurementRate(self.AccelerometerFrequency)
                 
-                if self.AcclFreq:
+                if self.AccelerometerFrequency:
                     time.sleep(1/accl.measurement_rate)
                     xAccl, yAccl, zAccl = accl.GetMeasurementData()
                     self.Dataset.xAccl, self.Dataset.yAccl, self.Dataset.zAccl = xAccl, yAccl, zAccl
                     roll = DataHandler.GetRoll(yAccl, zAccl)
                     pitch = DataHandler.GetPitch(xAccl, yAccl, zAccl)
                     # Save data format: [current_date, current_time, xAccl, yAccl, zAccl]
-                    if self.writeFile['accl']:
+                    if self.WriteFile['accl']:
                         date, ctime = self.current_datetime.now().isoformat().split("T")
                         data_storage.save_data((date, ctime, xAccl, yAccl, zAccl))
                         data_storage.save_to_file("accelerometer.csv")
@@ -97,15 +97,15 @@ class Dispatcher():
         def Gyro(gyro):
             data_storage = DataStorage()
             while True:
-                if isSensorFrequencyChanged(gyro, self.GyroFreq):
+                if isSensorFrequencyChanged(gyro, self.GyroscopeFrequency):
                     print("Gyroscope: frequency changed")
-                    gyro.SetMeasurementRate(self.GyroFreq)
+                    gyro.SetMeasurementRate(self.GyroscopeFrequency)
                 
-                if self.GyroFreq:
+                if self.GyroscopeFrequency:
                     time.sleep(1/gyro.measurement_rate)
                     xGyro, yGyro, zGyro = gyro.GetMeasurementData()
                     # Save data format: [current_date, current_time, xGyro, yGyro, zGyro]
-                    if self.writeFile['gyro']:
+                    if self.WriteFile['gyro']:
                         date, ctime = self.current_datetime.now().isoformat().split("T")
                         data_storage.save_data((date, ctime, xGyro, yGyro, zGyro))
                         data_storage.save_to_file("gyroscope.csv")
@@ -116,15 +116,15 @@ class Dispatcher():
         def Magn(magn):
             data_storage = DataStorage()
             while True:
-                if isSensorFrequencyChanged(magn, self.MagnFreq):
+                if isSensorFrequencyChanged(magn, self.MagnitometerFrequency):
                     print("Magnitometer: frequency have changed")
-                    magn.SetMeasurementRate(self.MagnFreq)
+                    magn.SetMeasurementRate(self.MagnitometerFrequency)
                 
-                if self.MagnFreq:
+                if self.MagnitometerFrequency:
                     time.sleep(1/magn.measurement_rate)
                     xMagn, yMagn, zMagn = magn.GetMeasurementData()
                     # Save data format: [current_date, current_time, xMagn, yMagn, zMagn]
-                    if self.writeFile['magn']:
+                    if self.WriteFile['magn']:
                         date, ctime = self.current_datetime.now().isoformat().split("T")
                         data_storage.save_data((date, ctime, xMagn, yMagn, zMagn))
                         data_storage.save_to_file("magnitometer.csv")
@@ -138,11 +138,11 @@ class Dispatcher():
         def Lidar(lidar):
             data_storage = DataStorage(100)
             while True:
-                if isSensorFrequencyChanged(lidar, self.LidarFreq):
+                if isSensorFrequencyChanged(lidar, self.LidarFrequency):
                     print("Lidar: frequency have changed")
-                    lidar.SetMeasurementRate(self.LidarFreq)
+                    lidar.SetMeasurementRate(self.LidarFrequency)
                 
-                if not self.LidarFreq == 0:
+                if self.LidarFrequency:
                     time.sleep(1/lidar.measurement_rate)
                     lidar_arr = lidar.GetMeasurementData()
                     points_arr = []
@@ -153,7 +153,7 @@ class Dispatcher():
                         point = Point(x, y, distance, angle)
                         points_arr.append(point)
                     # Save data format: [current_date, current_time, points]
-                    if self.writeFile['lidar']:    
+                    if self.WriteFile['lidar']:    
                         date, ctime = self.current_datetime.now().isoformat().split("T")
                         data_storage.save_data((date, ctime, points_arr))
                         data_storage.save_to_file("lidar.csv")

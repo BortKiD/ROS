@@ -60,20 +60,17 @@ def update():
 def set_frequency(e):
     """Выставляет частоту считывания данных с датчика"""
     
-    acclFrequency = accelerometer_scale.get()
-    dispatcher.AcclFreq = acclFrequency
+    dispatcher.AccelerometerFrequency = accelerometer_scale.get()
 
-    gyroFrequency = gyroscope_scale.get()
-    dispatcher.GyroFreq = gyroFrequency
+    dispatcher.GyroscopeFrequency = gyroscope_scale.get()
 
-    magnFrequency = magnitometer_scale.get()
-    dispatcher.MagnFreq = magnFrequency
+    dispatcher.MagnitometerFrequency = magnitometer_scale.get()
 
     lidarFrequency = lidar_scale.get()
     if not lidarFrequency == 0:
-        dispatcher.LidarFreq = lidarFrequency
+        dispatcher.LidarFrequency = lidarFrequency
     else:
-        dispatcher.LidarFreq = 0
+        dispatcher.LidarFrequency = 0
 
 def select():
     dispatcher.SetWritingFile('accl', accelerometer_save_data.get())
