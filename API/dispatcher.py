@@ -1,4 +1,3 @@
-import time
 import datetime
 from threading import Thread
 # from smbus import SMBus

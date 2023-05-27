@@ -82,9 +82,9 @@ def select():
     dispatcher.SetWritingFile('lidar', lidar_save_data.get())
 
 root = Tk()
-root.title("Интерфейс модуля обработки данных с датчиков лесного робота с помощью ROS2")
+root.title("Интерфейс модуля обработки данных с датчиков лесного робота")
 root.iconbitmap('./RobotImage.ico')
-root.geometry("600x250")
+root.geometry("600x300")
 
 # Создание элементов интерфейса
 accelerometer_label = Label(root, text='Accelerometer')
@@ -124,6 +124,7 @@ label_yaw = Label(root, text='Yaw = ?')
 
 lidar_label = Label(root, text='Lidar')
 lidar_canvas = Canvas(root, background='white', width=100, height=100)
+lidar_measure_label = Label(root, text='Масштабирование:')
 lidar_measure_scale = Scale(root, from_=1, to=5, orient=HORIZONTAL)
 lidar_measure_scale.set(1)
 lidar_scale = Scale(root, from_=0, to=5, orient=HORIZONTAL)
@@ -164,8 +165,9 @@ label_yaw.grid(column=3, row=3)
 lidar_label.grid(column=4, row=0)
 lidar_canvas.grid(column=4, row=1, columnspan=10, rowspan=3)
 lidar_scale.grid(column=4, row=4)
-lidar_measure_scale.grid(column=4, row=5)
-lidar_check_button.grid(column=4, row=6)
+lidar_measure_label.grid(column=4, row=5)
+lidar_measure_scale.grid(column=4, row=6)
+lidar_check_button.grid(column=4, row=7)
 
 danger_label.grid(column=0, row=6, columnspan=4)
 
