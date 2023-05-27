@@ -31,9 +31,15 @@ class Lidar():
         list=[]
         try:
             mass = []
-            for i in range(-180, 181):
+            for i in range(-180, -50):
                 # mass.append([i, round(random.uniform(10,15))])
                 mass.append([i, 50])
+            for i in range(-50, 50):
+                # mass.append([i, round(random.uniform(10,15))])
+                mass.append([i, 70])
+            for i in range(60, 180):
+                # mass.append([i, round(random.uniform(10,15))])
+                mass.append([i, 90])
 
         except SystemError:
             print("Невозможно считать данные с лидара!")

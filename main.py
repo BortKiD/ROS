@@ -5,13 +5,14 @@ from API.dispatcher import *
 def drawLidarData(canvas, points):
     """Отображает точки лидара на интерфейсе."""
     if len(points) > 0:
+        scale = lidar_measure_scale.get()
         norm_xy = [(i.X, i.Y) for i in points]
         canvas.delete('all')
         canvas.create_line(5, 50, 10, 50, arrow=LAST, fill='red')
         # canvas.create_line(5, 50, 100, 50, fill='red')
         for p in norm_xy:
-            x1, y1 = p[0] + 1, p[1] + 50 + 1
-            x2, y2 = p[0] - 1, p[1] + 50 - 1
+            x1, y1 = p[0]/scale + 1, p[1]/scale + 50 + 1
+            x2, y2 = p[0]/scale - 1, p[1]/scale + 50 - 1
             canvas.create_oval(x1, y1, x2, y2, fill='black')
         canvas.update()
 
@@ -123,6 +124,8 @@ label_yaw = Label(root, text='Yaw = ?')
 
 lidar_label = Label(root, text='Lidar')
 lidar_canvas = Canvas(root, background='white', width=100, height=100)
+lidar_measure_scale = Scale(root, from_=1, to=5, orient=HORIZONTAL)
+lidar_measure_scale.set(1)
 lidar_scale = Scale(root, from_=0, to=5, orient=HORIZONTAL)
 lidar_scale.set(3)
 lidar_save_data = IntVar()
@@ -161,7 +164,8 @@ label_yaw.grid(column=3, row=3)
 lidar_label.grid(column=4, row=0)
 lidar_canvas.grid(column=4, row=1, columnspan=10, rowspan=3)
 lidar_scale.grid(column=4, row=4)
-lidar_check_button.grid(column=4, row=5)
+lidar_measure_scale.grid(column=4, row=5)
+lidar_check_button.grid(column=4, row=6)
 
 danger_label.grid(column=0, row=6, columnspan=4)
 
