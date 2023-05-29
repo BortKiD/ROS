@@ -1,5 +1,5 @@
 from tkinter import *
-from API.dispatcher import *
+from dispatcher import *
 
 # Lidar display
 def drawLidarData(canvas, points):
@@ -8,11 +8,10 @@ def drawLidarData(canvas, points):
         scale = lidar_measure_scale.get()
         norm_xy = [(i.X, i.Y) for i in points]
         canvas.delete('all')
-        canvas.create_line(5, 50, 10, 50, arrow=LAST, fill='red')
-        # canvas.create_line(5, 50, 100, 50, fill='red')
+        canvas.create_line(5, 100, 10, 100, arrow=LAST, fill='red')
         for p in norm_xy:
-            x1, y1 = p[0]/scale + 1, p[1]/scale + 50 + 1
-            x2, y2 = p[0]/scale - 1, p[1]/scale + 50 - 1
+            x1, y1 = p[0]/scale + 1, p[1]/scale + 100 + 1
+            x2, y2 = p[0]/scale - 1, p[1]/scale + 100 - 1
             canvas.create_oval(x1, y1, x2, y2, fill='black')
         canvas.update()
 
@@ -80,8 +79,8 @@ def select():
 
 root = Tk()
 root.title("Интерфейс модуля обработки данных с датчиков лесного робота")
-root.iconbitmap('./RobotImage.ico')
-root.geometry("600x300")
+# root.iconbitmap('./RobotImage.ico')
+root.geometry("650x400")
 
 # Создание элементов интерфейса
 accelerometer_label = Label(root, text='Accelerometer')
@@ -120,9 +119,9 @@ label_roll = Label(root, text='Roll = ?')
 label_yaw = Label(root, text='Yaw = ?')
 
 lidar_label = Label(root, text='Lidar')
-lidar_canvas = Canvas(root, background='white', width=100, height=100)
+lidar_canvas = Canvas(root, background='white', width=200, height=200)
 lidar_measure_label = Label(root, text='Масштабирование:')
-lidar_measure_scale = Scale(root, from_=1, to=5, orient=HORIZONTAL)
+lidar_measure_scale = Scale(root, from_=1, to=10, orient=HORIZONTAL)
 lidar_measure_scale.set(1)
 lidar_scale = Scale(root, from_=0, to=5, orient=HORIZONTAL)
 lidar_scale.set(3)
@@ -159,12 +158,12 @@ label_pitch.grid(column=3, row=1)
 label_roll.grid(column=3, row=2)
 label_yaw.grid(column=3, row=3)
 
-lidar_label.grid(column=4, row=0)
-lidar_canvas.grid(column=4, row=1, columnspan=10, rowspan=3)
-lidar_scale.grid(column=4, row=4)
-lidar_measure_label.grid(column=4, row=5)
-lidar_measure_scale.grid(column=4, row=6)
-lidar_check_button.grid(column=4, row=7)
+lidar_label.grid(column=4, row=0, columnspan=15)
+lidar_canvas.grid(column=4, row=1, columnspan=15, rowspan=3)
+lidar_scale.grid(column=4, row=4, columnspan=15)
+lidar_measure_label.grid(column=4, row=5, columnspan=15)
+lidar_measure_scale.grid(column=4, row=6, columnspan=15)
+lidar_check_button.grid(column=4, row=7, columnspan=15)
 
 danger_label.grid(column=0, row=6, columnspan=4)
 
@@ -181,6 +180,9 @@ accelerometer_scale.bind("<ButtonRelease-1>", set_frequency)
 magnitometer_scale.bind("<ButtonRelease-1>", set_frequency)
 gyroscope_scale.bind("<ButtonRelease-1>", set_frequency)
 lidar_scale.bind("<ButtonRelease-1>", set_frequency)
+
+root.grid_rowconfigure(0, pad=5)
+root.grid_columnconfigure(0, pad=10)
 
 root.after(100, update)
 
